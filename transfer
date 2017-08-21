@@ -1,0 +1,19 @@
+#!/usr/local/bin/php
+<?php
+
+require 'vendor/autoload.php';
+
+use Acme\Bank;
+use Acme\Transfer;
+use Acme\BankAccount;
+
+$bank = new Bank();
+$transfer = Transfer::amount($argv[1])
+    ->from(new BankAccount($argv[2]))
+    ->to(new BankAccount($argv[3]));
+
+try {
+    $bank->execute($transfer);
+} catch (RuntimeException $e) {
+    echo $e->getMessage();
+}
