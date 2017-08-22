@@ -68,8 +68,6 @@ class FeatureContext extends RawMinkContext
         $page->selectFieldOption('to_account', 'premium_account');
 
         $page->pressButton('Transfer');
-        sleep(5);
-
     }
 
     /**
@@ -99,9 +97,8 @@ class FeatureContext extends RawMinkContext
      */
     public function iShouldBeToldThatICannotTransferMoreMoneyThanIHaveInMyAccount()
     {
-        Assert::assertEquals(
-            'You do not have enough money in your account to make this transfer',
-            $this->output[0]
+        $this->assertSession()->pageTextContains(
+            'You do not have enough money in your account to make this transfer'
         );
     }
 
@@ -110,5 +107,13 @@ class FeatureContext extends RawMinkContext
      */
     public function iTransferPsFromMyPremiumToCurrentAccount(float $amount)
     {
+        $this->getSession()->visit($this->getMinkParameter('base_url') . '/');
+        $page = $this->getSession()->getPage();
+
+        $page->fillField('amount', $amount);
+        $page->selectFieldOption('from_account', 'premium_account');
+        $page->selectFieldOption('to_account', 'current_account');
+
+        $page->pressButton('Transfer');
     }
 }
