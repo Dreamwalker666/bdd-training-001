@@ -1,0 +1,16 @@
+services:
+    acme.controller:
+        class: App\Controller
+        arguments: ['@acme.bank_account_factory']
+
+    acme.bank_account_factory:
+        class: App\BankAccountFactory
+        arguments: ['@acme.repository.premium_account', '@acme.repository.current_account']
+
+    acme.repository.premium_account:
+        class: Acme\Account\FileBasedAccountRepository
+        arguments: ['premium_account']
+
+    acme.repository.current_account:
+        class: Acme\Account\FileBasedAccountRepository
+        arguments: ['current_account']
