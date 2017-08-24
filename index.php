@@ -20,6 +20,10 @@
 </html>
 
 <?php
+if (!$_POST) {
+    exit;
+
+}
 require_once 'vendor/autoload.php';
 
 use Acme\Bank;
