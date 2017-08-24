@@ -17,19 +17,26 @@
         <input type="submit" value="Transfer">
 
     </form>
+
 </html>
 
 <?php
+
+if (!$_POST) {
+    exit;
+}
+
 require_once 'vendor/autoload.php';
 
+use Acme\Account\FileBasedAccountRepository;
 use Acme\Bank;
 use Acme\Transfer;
 use Acme\BankAccount;
 
 $bank = new Bank();
 $transfer = Transfer::amount($_POST['amount'])
-    ->from(new BankAccount($_POST['from_account']))
-    ->to(new BankAccount($_POST['to_account']));
+    ->from(new BankAccount(new FileBasedAccountRepository($_POST['from_account'])))
+    ->to(new BankAccount(new FileBasedAccountRepository($_POST['to_account'])));
 
 try {
     $bank->execute($transfer);

@@ -3,14 +3,15 @@
 
 require 'vendor/autoload.php';
 
+use Acme\Account\FileBasedAccountRepository;
 use Acme\Bank;
 use Acme\Transfer;
 use Acme\BankAccount;
 
 $bank = new Bank();
 $transfer = Transfer::amount($argv[1])
-    ->from(new BankAccount($argv[2]))
-    ->to(new BankAccount($argv[3]));
+    ->from(new BankAccount(new FileBasedAccountRepository($argv[2])))
+    ->to(new BankAccount(new FileBasedAccountRepository($argv[3])));
 
 try {
     $bank->execute($transfer);

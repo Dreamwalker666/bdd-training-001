@@ -2,39 +2,26 @@
 
 namespace Acme;
 
+use Acme\Account\AccountRepository;
+
 class BankAccount
 {
-    const TYPE_PREMIUM = 'premium_account';
-    const TYPE_CURRENT = 'current_account';
-
-    const BASE_DIR = __DIR__ .  '/../../';
     /**
-     * @var string
+     * @var AccountRepository
      */
-    private $type;
+    private $accountRepository;
 
     /**
-     * @param string $type
-     * @internal param string $string
+     * @param AccountRepository $accountRepository
      */
-    public function __construct(string $type)
+    public function __construct(AccountRepository $accountRepository)
     {
-        $this->type = $type;
-    }
-
-    public static function current()
-    {
-        return new static(static::TYPE_CURRENT);
-    }
-
-    public static function premium()
-    {
-        return new static(static::TYPE_PREMIUM);
+        $this->accountRepository = $accountRepository;
     }
 
     public function debit(float $amount)
     {
-        $oldBalance = (float) file_get_contents(static::BASE_DIR.$this->type);
+        $oldBalance = $this->accountRepository->getBalance();
 
         $newBalance = $oldBalance - $amount;
 
@@ -47,19 +34,19 @@ class BankAccount
             $newBalance -= $amount * 0.01;
         }
 
-        if ($this->type === static::TYPE_PREMIUM) {
+        if ($this->accountRepository->isPremium()) {
             $newBalance -= 0.3;
         }
 
-        file_put_contents($this->type, $newBalance);
+        $this->accountRepository->setBalance($newBalance);
     }
 
     public function credit($amount)
     {
-        $oldBalance = (float) file_get_contents(static::BASE_DIR.$this->type);
+        $oldBalance = $this->accountRepository->getBalance();
 
         $newBalance = $oldBalance + $amount;
 
-        file_put_contents($this->type, $newBalance);
+        $this->accountRepository->setBalance($newBalance);
     }
 }

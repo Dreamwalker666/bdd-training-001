@@ -2,15 +2,8 @@
 
 namespace Web;
 
-use Acme\Bank;
-use Acme\Transfer;
-use Behat\Behat\Tester\Exception\PendingException;
-use Behat\Behat\Context\Context;
-use Behat\Gherkin\Node\PyStringNode;
-use Behat\Gherkin\Node\TableNode;
 use Behat\MinkExtension\Context\RawMinkContext;
 use PHPUnit\Framework\Assert;
-use Acme\BankAccount;
 use RuntimeException;
 
 /**
@@ -61,6 +54,7 @@ class FeatureContext extends RawMinkContext
     public function iTransferPsFromMyCurrentAccountToMyPremiumAccount(float $amount)
     {
         $this->getSession()->visit($this->getMinkParameter('base_url') . '/');
+
         $page = $this->getSession()->getPage();
 
         $page->fillField('amount', $amount);

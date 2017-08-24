@@ -11,7 +11,6 @@
      - If transfer amount is over £100 and its from P to C -> %1 is charged first, then 30p deducted
      - Transfers must be of a minimum £5
 
-    @javascript
     Scenario: Simple transfer of money from Current to premium
         Given the balance on my current account is £15
         And the balance on my premium account is £5

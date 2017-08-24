@@ -2,6 +2,7 @@
 
 namespace Script;
 
+use Acme\Account\FileBasedAccountRepository;
 use Acme\Bank;
 use Acme\Transfer;
 use Behat\Behat\Tester\Exception\PendingException;
@@ -26,6 +27,8 @@ class FeatureContext implements Context
      * @var array
      */
     private $output;
+    private $currentAccountRepository;
+    private $premiumAccountRepository;
 
     /**
      * Initializes context.
@@ -36,6 +39,8 @@ class FeatureContext implements Context
      */
     public function __construct()
     {
+        $this->currentAccountRepository = new FileBasedAccountRepository('current_account');
+        $this->premiumAccountRepository = new FileBasedAccountRepository('premium_account');
     }
 
     /**
@@ -43,7 +48,7 @@ class FeatureContext implements Context
      */
     public function theBalanceOnMyCurrentAccountIsPs(float $balance)
     {
-        file_put_contents('current_account', $balance);
+        $this->currentAccountRepository->setBalance($balance);
     }
 
     /**
@@ -51,7 +56,8 @@ class FeatureContext implements Context
      */
     public function theBalanceOnMyPremiumAccountIsPs(float $balance)
     {
-        file_put_contents('premium_account', $balance);
+        $this->premiumAccountRepository->setBalance($balance);
+
     }
 
     /**

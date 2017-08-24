@@ -2,6 +2,8 @@
 
 namespace Direct;
 
+use Acme\Account\FileBasedAccountRepository;
+use Acme\Account\InMemoryAccountRepository;
 use Acme\Bank;
 use Acme\Transfer;
 use Behat\Behat\Tester\Exception\PendingException;
@@ -22,6 +24,16 @@ class FeatureContext implements Context
      */
     private $exception;
 
+    /**
+     * @var FileBasedAccountRepository
+     */
+    private $currentAccountRepository;
+
+    /**
+     * @var FileBasedAccountRepository
+     */
+    private $premiumAccountRepository;
+
 
     /**
      * Initializes context.
@@ -32,6 +44,12 @@ class FeatureContext implements Context
      */
     public function __construct()
     {
+        $this->currentAccountRepository = new FileBasedAccountRepository('current_account');
+        $this->premiumAccountRepository = new FileBasedAccountRepository('premium_account');
+
+        // Swap to in-memory:
+        //   $this->currentAccountRepository = new InMemoryAccountRepository('current_account');
+        //   $this->premiumAccountRepository = new InMemoryAccountRepository('premium_account');
     }
 
     /**
@@ -39,7 +57,7 @@ class FeatureContext implements Context
      */
     public function theBalanceOnMyCurrentAccountIsPs(float $balance)
     {
-        file_put_contents('current_account', $balance);
+        $this->currentAccountRepository->setBalance($balance);
     }
 
     /**
@@ -47,7 +65,7 @@ class FeatureContext implements Context
      */
     public function theBalanceOnMyPremiumAccountIsPs(float $balance)
     {
-        file_put_contents('premium_account', $balance);
+        $this->premiumAccountRepository->setBalance($balance);
     }
 
     /**
@@ -57,8 +75,8 @@ class FeatureContext implements Context
     {
         $bank = new Bank();
         $transfer = Transfer::amount($amount)
-            ->from(BankAccount::current())
-            ->to(BankAccount::premium());
+            ->from(new BankAccount($this->currentAccountRepository))
+            ->to(new BankAccount($this->premiumAccountRepository));
 
         try {
             $bank->execute($transfer);
@@ -74,7 +92,7 @@ class FeatureContext implements Context
     {
         Assert::assertEquals(
             $balance,
-            (float) file_get_contents('current_account')
+            $this->currentAccountRepository->getBalance()
         );
     }
 
@@ -85,7 +103,7 @@ class FeatureContext implements Context
     {
         Assert::assertEquals(
             $balance,
-            (float) file_get_contents('premium_account')
+            $this->premiumAccountRepository->getBalance()
         );
     }
 
@@ -107,8 +125,8 @@ class FeatureContext implements Context
     {
         $bank = new Bank();
         $transfer = Transfer::amount($amount)
-            ->to(BankAccount::current())
-            ->from(BankAccount::premium());
+            ->from(new BankAccount($this->premiumAccountRepository))
+            ->to(new BankAccount($this->currentAccountRepository));
 
         try {
             $bank->execute($transfer);
