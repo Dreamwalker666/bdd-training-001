@@ -5,7 +5,7 @@ namespace Acme\Account;
 class InMemoryAccountRepository implements AccountRepository
 {
 
-    private $balance;
+    private $balance = 0.0;
 
     /**
      * @var string

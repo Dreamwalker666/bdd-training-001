@@ -2,14 +2,22 @@
 
 namespace Web;
 
+use Acme\Account\AccountRepository;
+use Behat\Behat\Hook\Scope\BeforeScenarioScope;
+use Behat\Mink\Driver\BrowserKitDriver;
+use Behat\Mink\Session;
 use Behat\MinkExtension\Context\RawMinkContext;
+use Behat\Symfony2Extension\Context\KernelAwareContext;
 use PHPUnit\Framework\Assert;
 use RuntimeException;
+use Symfony\Component\HttpKernel\Client;
+use Symfony\Component\HttpKernel\Kernel;
+use Symfony\Component\HttpKernel\KernelInterface;
 
 /**
  * Defines application features from the specific context.
  */
-class FeatureContext extends RawMinkContext
+class FeatureContext extends RawMinkContext implements KernelAwareContext
 {
     /**
      * @var RuntimeException
@@ -17,9 +25,18 @@ class FeatureContext extends RawMinkContext
     private $exception;
 
     /**
-     * @var array
+     * @var AccountRepository
      */
-    private $output;
+    private $currentAccountRepository;
+
+    /**
+     * @var AccountRepository
+     */
+    private $premiumAccountRepository;
+    /**
+     * @var Kernel
+     */
+    private $kernel;
 
     /**
      * Initializes context.
@@ -27,9 +44,24 @@ class FeatureContext extends RawMinkContext
      * Every scenario gets its own context instance.
      * You can also pass arbitrary arguments to the
      * context constructor through behat.yml.
+     * @param AccountRepository $currentAccountRepository
+     * @param AccountRepository $premiumAccountRepository
      */
-    public function __construct()
+    public function __construct(AccountRepository $currentAccountRepository, AccountRepository $premiumAccountRepository)
     {
+        $this->currentAccountRepository = $currentAccountRepository;
+        $this->premiumAccountRepository = $premiumAccountRepository;
+
+    }
+
+    /**
+     * @BeforeScenario
+     * @param BeforeScenarioScope $scope
+     */
+    public function setup(BeforeScenarioScope $scope)
+    {
+        $this->getMink()->registerSession('test', new Session(new BrowserKitDriver(new Client($this->kernel))));
+        $this->getMink()->setDefaultSessionName('test');
     }
 
     /**
@@ -37,7 +69,7 @@ class FeatureContext extends RawMinkContext
      */
     public function theBalanceOnMyCurrentAccountIsPs(float $balance)
     {
-        file_put_contents('current_account', $balance);
+        $this->currentAccountRepository->setBalance($balance);
     }
 
     /**
@@ -45,7 +77,7 @@ class FeatureContext extends RawMinkContext
      */
     public function theBalanceOnMyPremiumAccountIsPs(float $balance)
     {
-        file_put_contents('premium_account', $balance);
+        $this->premiumAccountRepository->setBalance($balance);
     }
 
     /**
@@ -71,7 +103,7 @@ class FeatureContext extends RawMinkContext
     {
         Assert::assertEquals(
             $balance,
-            (float) file_get_contents('current_account')
+            $this->currentAccountRepository->getBalance()
         );
     }
 
@@ -82,7 +114,7 @@ class FeatureContext extends RawMinkContext
     {
         Assert::assertEquals(
             $balance,
-            (float) file_get_contents('premium_account')
+            $this->premiumAccountRepository->getBalance()
         );
     }
 
@@ -109,5 +141,15 @@ class FeatureContext extends RawMinkContext
         $page->selectFieldOption('to_account', 'current_account');
 
         $page->pressButton('Transfer');
+    }
+
+    /**
+     * Sets Kernel instance.
+     *
+     * @param KernelInterface $kernel
+     */
+    public function setKernel(KernelInterface $kernel)
+    {
+        $this->kernel = $kernel;
     }
 }

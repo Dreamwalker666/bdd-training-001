@@ -7,8 +7,8 @@ default:
             sessions:
                 default:
                     symfony2: ~
-                symfony:
-                    symfony2:
+                goutte:
+                    goutte: ~
                 webdriver:
                     selenium2: ~
 
@@ -17,9 +17,13 @@ default:
         default:
             contexts:
               - Direct\FeatureContext:
+                  currentAccountRepository: '@acme.repository.current_account'
+                  premiumAccountRepository: '@acme.repository.premium_account'
         script:
             contexts:
               - Script\FeatureContext:
         web:
             contexts:
               - Web\FeatureContext:
+                  currentAccountRepository: '@acme.repository.current_account'
+                  premiumAccountRepository: '@acme.repository.premium_account'

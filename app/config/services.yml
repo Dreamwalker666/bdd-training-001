@@ -8,7 +8,7 @@ services:
         arguments: ['@acme.repository.premium_account', '@acme.repository.current_account']
 
     acme.repository.premium_account:
-        class: Acme\Account\FileBasedAccountRepository
+        class: Acme\Account\InMemoryAccountRepository
         arguments: ['premium_account']
 
     acme.repository.current_account:

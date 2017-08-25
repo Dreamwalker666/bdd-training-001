@@ -43,6 +43,7 @@ class BankAccount
 
     public function credit($amount)
     {
+
         $oldBalance = $this->accountRepository->getBalance();
 
         $newBalance = $oldBalance + $amount;

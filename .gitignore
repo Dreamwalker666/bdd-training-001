@@ -1,3 +1,5 @@
+bin/
+app/cache/
 vendor/
 current_account
 premium_account

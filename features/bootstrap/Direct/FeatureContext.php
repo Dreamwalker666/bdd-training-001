@@ -2,6 +2,7 @@
 
 namespace Direct;
 
+use Acme\Account\AccountRepository;
 use Acme\Account\FileBasedAccountRepository;
 use Acme\Account\InMemoryAccountRepository;
 use Acme\Bank;
@@ -41,16 +42,15 @@ class FeatureContext implements Context
      * Every scenario gets its own context instance.
      * You can also pass arbitrary arguments to the
      * context constructor through behat.yml.
+     * @param AccountRepository $currentAccountRepository
+     * @param AccountRepository $premiumAccountRepository
      */
-    public function __construct()
+    public function __construct(AccountRepository $currentAccountRepository, AccountRepository $premiumAccountRepository)
     {
-        $this->currentAccountRepository = new FileBasedAccountRepository('current_account');
-        $this->premiumAccountRepository = new FileBasedAccountRepository('premium_account');
-
-        // Swap to in-memory:
-        //   $this->currentAccountRepository = new InMemoryAccountRepository('current_account');
-        //   $this->premiumAccountRepository = new InMemoryAccountRepository('premium_account');
+        $this->currentAccountRepository = $currentAccountRepository;
+        $this->premiumAccountRepository = $premiumAccountRepository;
     }
+
 
     /**
      * @Given the balance on my current account is £:balance
@@ -58,6 +58,7 @@ class FeatureContext implements Context
     public function theBalanceOnMyCurrentAccountIsPs(float $balance)
     {
         $this->currentAccountRepository->setBalance($balance);
+
     }
 
     /**
